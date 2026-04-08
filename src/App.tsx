@@ -97,13 +97,29 @@ export default function App() {
       }
     } catch (error: any) {
       console.error(error);
-      if (error.message === "QUOTA_EXCEEDED_90" || error.message === "API_QUOTA_EXHAUSTED") {
+      if (error.message === "MISSING_API_KEY") {
         setResultData({
-          reflection: "오늘의 해몽 기운이 소진되었습니다.",
-          summary: "쿼터 초과",
-          oneLiner: "내일 다시 시도해주세요.",
+          reflection: "별의 열쇠(API Key)가 설정되지 않았습니다.",
+          summary: "설정 오류",
+          oneLiner: ".env 파일에 API 키를 설정해주세요.",
           symbols: [],
-          emotionalInsight: "내일 다시 새로운 꿈과 함께 찾아와 주세요. 과도한 해몽은 무의식에 혼란을 줄 수 있습니다."
+          emotionalInsight: "루트 디렉토리에 .env 파일을 생성하고 GEMINI_API_KEY를 입력해야 꿈을 해독할 수 있습니다. .env.example 파일을 참고하세요."
+        });
+      } else if (error.message === "QUOTA_EXCEEDED_90") {
+        setResultData({
+          reflection: "오늘의 로컬 해몽 제한에 도달했습니다.",
+          summary: "로컬 쿼터 초과",
+          oneLiner: "내일 다시 시도하거나 브라우저 캐시를 비워주세요.",
+          symbols: [],
+          emotionalInsight: "무분별한 해몽을 방지하기 위해 로컬에 저장된 일일 사용량을 모두 소진했습니다. 내일 다시 새로운 꿈으로 찾아와 주세요."
+        });
+      } else if (error.message === "API_QUOTA_EXHAUSTED") {
+        setResultData({
+          reflection: "현재 별의 기운(API 서버)이 매우 혼잡합니다.",
+          summary: "서버 일시 한계",
+          oneLiner: "약 1분 후에 다시 시도해 보세요.",
+          symbols: [],
+          emotionalInsight: "Google API 서버에서 일시적으로 요청이 거절되었습니다. 무료 티어의 분당 요청 제한(RPM) 때문일 수 있으니, 잠시 마음을 가다듬고 1분 후에 다시 시도해 주시기 바랍니다."
         });
       } else {
         setResultData({
