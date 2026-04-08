@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Grandiflora+One&family=Inter:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Grandiflora One", ui-serif, Georgia, serif;
+}
+
+body {
+  background-color: #05050a;
+  color: #e2e8f0;
+  overflow-x: hidden;
+}
+
+/* Custom glowing animations */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px 5px rgba(139, 92, 246, 0.3); }
+  50% { box-shadow: 0 0 40px 15px rgba(139, 92, 246, 0.6); }
+}
+
+.crystal-ball {
+  animation: pulse-glow 4s infinite ease-in-out;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8) 0%, rgba(139, 92, 246, 0.4) 20%, rgba(30, 27, 75, 0.8) 60%, rgba(0,0,0,0.9) 100%);
+  box-shadow: inset -10px -10px 40px rgba(0,0,0,0.5), inset 10px 10px 30px rgba(255,255,255,0.2), 0 0 30px rgba(139, 92, 246, 0.5);
+}
+
+.glass-panel {
+  background: rgba(15, 10, 30, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.text-gradient {
+  background: linear-gradient(to right, #a78bfa, #818cf8, #38bdf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  padding-bottom: 0.2em;
+}
+
+.markdown-body h1, .markdown-body h2, .markdown-body h3 {
+  font-family: var(--font-serif);
+  color: #e9d5ff;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 300;
+}
+.markdown-body p {
+  margin-bottom: 1.5rem;
+  color: #cbd5e1;
+}
+.markdown-body strong {
+  color: #a78bfa;
+  font-weight: 500;
+}
+.markdown-body ul, .markdown-body ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #cbd5e1;
+}
+.markdown-body ul {
+  list-style-type: disc;
+}
+.markdown-body ol {
+  list-style-type: decimal;
+}
+.markdown-body li {
+  margin-bottom: 0.5rem;
+}
