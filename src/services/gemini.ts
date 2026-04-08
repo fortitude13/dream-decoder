@@ -135,7 +135,7 @@ export async function generateDreamImage(dreamText: string, summary: string): Pr
       },
       config: {
         imageConfig: {
-          aspectRatio: "1:1",
+        
         },
       },
     });
