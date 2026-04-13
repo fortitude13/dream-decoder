@@ -12,37 +12,31 @@ export interface DreamInterpretation {
 const DAILY_LIMIT = 1500; // Gemini 2.0 Flash 무료 티어 기준
 const QUOTA_THRESHOLD = 0.9; // 90% 임계값
 
-function checkUsage(): boolean {
+function checkAndTrackUsage(): boolean {
   const today = new Date().toISOString().split('T')[0];
   const storageKey = `dream_decoder_usage_${today}`;
   
   const currentUsage = parseInt(localStorage.getItem(storageKey) || '0', 10);
-  console.log(`[DreamDecoder] Today's API usage: ${currentUsage}/${DAILY_LIMIT}`);
   
   if (currentUsage >= DAILY_LIMIT * QUOTA_THRESHOLD) {
     console.warn(`사용량 임계값(${QUOTA_THRESHOLD * 100}%)에 도달했습니다. 현재 사용량: ${currentUsage}/${DAILY_LIMIT}`);
     return false;
   }
   
+  localStorage.setItem(storageKey, (currentUsage + 1).toString());
   return true;
 }
 
-function trackUsage() {
-  const today = new Date().toISOString().split('T')[0];
-  const storageKey = `dream_decoder_usage_${today}`;
-  const currentUsage = parseInt(localStorage.getItem(storageKey) || '0', 10);
-  localStorage.setItem(storageKey, (currentUsage + 1).toString());
-}
-
 export async function interpretDream(dreamText: string, keywords: string[]): Promise<DreamInterpretation | null> {
-  // 사용량 체크
-  if (!checkUsage()) {
-    throw new Error("QUOTA_EXCEEDED_90");
+  // API 키 확인
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === "undefined" || apiKey === "MY_GEMINI_API_KEY") {
+    throw new Error("API_KEY_MISSING");
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === "undefined" || apiKey === "") {
-    throw new Error("MISSING_API_KEY");
+  // 사용량 체크
+  if (!checkAndTrackUsage()) {
+    throw new Error("QUOTA_EXCEEDED_90");
   }
 
   const ai = new GoogleGenAI({ apiKey });
@@ -55,7 +49,7 @@ export async function interpretDream(dreamText: string, keywords: string[]): Pro
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.0-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -97,7 +91,6 @@ export async function interpretDream(dreamText: string, keywords: string[]): Pro
     });
 
     if (response.text) {
-      trackUsage();
       return JSON.parse(response.text) as DreamInterpretation;
     }
     return null;
@@ -112,8 +105,8 @@ export async function interpretDream(dreamText: string, keywords: string[]): Pro
 
 export async function generateDreamImage(dreamText: string, summary: string): Promise<string | null> {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === "undefined" || apiKey === "") {
-    throw new Error("MISSING_API_KEY");
+  if (!apiKey || apiKey === "undefined" || apiKey === "MY_GEMINI_API_KEY") {
+    return null;
   }
 
   const ai = new GoogleGenAI({ apiKey });
@@ -125,7 +118,7 @@ export async function generateDreamImage(dreamText: string, summary: string): Pr
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.5-flash-image',
       contents: {
         parts: [
           {
@@ -135,7 +128,7 @@ export async function generateDreamImage(dreamText: string, summary: string): Pr
       },
       config: {
         imageConfig: {
-        
+          aspectRatio: "1:1",
         },
       },
     });

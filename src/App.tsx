@@ -97,29 +97,21 @@ export default function App() {
       }
     } catch (error: any) {
       console.error(error);
-      if (error.message === "MISSING_API_KEY") {
+      if (error.message === "API_KEY_MISSING") {
         setResultData({
-          reflection: "별의 열쇠(API Key)가 설정되지 않았습니다.",
+          reflection: "API 키가 설정되지 않았습니다.",
           summary: "설정 오류",
-          oneLiner: ".env 파일에 API 키를 설정해주세요.",
+          oneLiner: "Vercel 환경 변수를 확인해주세요.",
           symbols: [],
-          emotionalInsight: "루트 디렉토리에 .env 파일을 생성하고 GEMINI_API_KEY를 입력해야 꿈을 해독할 수 있습니다. .env.example 파일을 참고하세요."
+          emotionalInsight: "Vercel Settings > Environment Variables에서 GEMINI_API_KEY를 추가해야 합니다."
         });
-      } else if (error.message === "QUOTA_EXCEEDED_90") {
+      } else if (error.message === "QUOTA_EXCEEDED_90" || error.message === "API_QUOTA_EXHAUSTED") {
         setResultData({
-          reflection: "오늘의 로컬 해몽 제한에 도달했습니다.",
-          summary: "로컬 쿼터 초과",
-          oneLiner: "내일 다시 시도하거나 브라우저 캐시를 비워주세요.",
+          reflection: "오늘의 해몽 기운이 소진되었습니다.",
+          summary: "쿼터 초과",
+          oneLiner: "내일 다시 시도해주세요.",
           symbols: [],
-          emotionalInsight: "무분별한 해몽을 방지하기 위해 로컬에 저장된 일일 사용량을 모두 소진했습니다. 내일 다시 새로운 꿈으로 찾아와 주세요."
-        });
-      } else if (error.message === "API_QUOTA_EXHAUSTED") {
-        setResultData({
-          reflection: "현재 별의 기운(API 서버)이 매우 혼잡합니다.",
-          summary: "서버 일시 한계",
-          oneLiner: "약 1분 후에 다시 시도해 보세요.",
-          symbols: [],
-          emotionalInsight: "Google API 서버에서 일시적으로 요청이 거절되었습니다. 무료 티어의 분당 요청 제한(RPM) 때문일 수 있으니, 잠시 마음을 가다듬고 1분 후에 다시 시도해 주시기 바랍니다."
+          emotionalInsight: "내일 다시 새로운 꿈과 함께 찾아와 주세요. 과도한 해몽은 무의식에 혼란을 줄 수 있습니다."
         });
       } else {
         setResultData({
@@ -277,21 +269,61 @@ export default function App() {
               <p className="text-sm md:text-lg font-sans tracking-[0.3em] uppercase text-purple-300 drop-shadow-2xl mb-6 drop-shadow-lg font-medium">
                 Dreams are fragments of the subconscious.
               </p>
-              <h1 className="text-5xl md:text-8xl font-serif mb-16 text-white drop-shadow-2xl font-light tracking-tight leading-[1.1]">
+              <h1 className="text-[clamp(2.5rem,10vw,6rem)] font-serif mb-12 text-white drop-shadow-2xl font-light tracking-tight leading-[1.1] px-4">
                 <SparklesText>
                   당신의 꿈은 <br /> 무엇을 말하고 있나요?
                 </SparklesText>
               </h1>
               
-              <motion.div 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setPage('input')}
-                className="w-full max-w-lg glass-panel rounded-full p-4 shadow-2xl border border-white/20 backdrop-blur-md bg-white/5 hover:bg-white/10 cursor-text flex items-center transition-all duration-300"
-              >
-                <Sparkles className="w-5 h-5 text-purple-400 mx-3" />
-                <span className="text-slate-300 text-lg font-light tracking-wide opacity-70">어떤 꿈을 꾸셨나요?</span>
-              </motion.div>
+              <div className="w-full max-w-lg relative group">
+                <motion.div 
+                  whileHover={{ scale: 1.01 }}
+                  className="glass-panel rounded-full p-1 shadow-2xl border border-white/20 backdrop-blur-md bg-white/5 hover:bg-white/10 flex items-center transition-all duration-300"
+                >
+                  <Sparkles className="w-5 h-5 text-purple-400 mx-4 shrink-0" />
+                  <input 
+                    type="text"
+                    value={dreamText}
+                    onChange={(e) => setDreamText(e.target.value)}
+                    onFocus={() => {
+                      if (dreamText.length === 0) {
+                        // Optional: could redirect immediately or wait for typing
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && dreamText.length >= 10) {
+                        setPage('input');
+                      }
+                    }}
+                    placeholder="최소 10자 이상 꿈을 기록해보세요..."
+                    className="w-full bg-transparent border-none outline-none py-3 pr-6 text-slate-200 text-lg font-light tracking-wide placeholder:text-slate-500"
+                  />
+                  {dreamText.length > 0 && (
+                    <button 
+                      onClick={() => setPage('input')}
+                      className="mr-2 p-2 bg-purple-600 rounded-full hover:bg-purple-500 transition-colors shadow-lg"
+                    >
+                      <ChevronDown className="w-5 h-5 text-white -rotate-90" />
+                    </button>
+                  )}
+                </motion.div>
+                
+                {/* Progress Indicator */}
+                {dreamText.length > 0 && (
+                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-full max-w-[80%] flex flex-col items-center gap-2">
+                    <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min((dreamText.length / 10) * 100, 100)}%` }}
+                        className={`h-full ${dreamText.length >= 10 ? 'bg-purple-400' : 'bg-blue-400'}`}
+                      />
+                    </div>
+                    <span className="text-[10px] tracking-widest text-slate-500 uppercase">
+                      {dreamText.length < 10 ? `${10 - dreamText.length}자 더 입력해주세요` : '준비되었습니다'}
+                    </span>
+                  </div>
+                )}
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -305,19 +337,43 @@ export default function App() {
             transition={{ duration: 1 }}
             className="absolute inset-0 flex flex-col items-center justify-start z-10 px-4 py-8 overflow-y-auto"
           >
-            <div className="w-full max-w-3xl mx-auto flex flex-col items-center pb-20 pt-16">
+            <div className="w-full max-w-3xl mx-auto flex flex-col items-center pb-12 pt-8">
               
-              <FloatingHeroImage 
-                src="https://postfiles.pstatic.net/MjAyNjAzMDhfMjgw/MDAxNzcyOTY5NzcyNTQz.GXy5fCDUdaVu2Uogc2RXJJESG-Rxhe6s10NMNjdhd18g.F7fTbt5s1X-0RVjL_AsAJFsYreumU1GLcKDzOBNXnRMg.PNG/%EC%A0%9C%EB%AA%A9_%EC%97%86%EC%9D%8C-1.png?type=w966"
-                alt="Crystal Ball"
-                glowColorClass="bg-purple-500"
-                shadowColor="rgba(168,85,247,0.4)"
-                onClick={handleSubmit} 
-                disabled={!dreamText.trim()} 
-              />
+              <div className="relative mb-4">
+                <FloatingHeroImage 
+                  src="https://postfiles.pstatic.net/MjAyNjAzMDhfMjgw/MDAxNzcyOTY5NzcyNTQz.GXy5fCDUdaVu2Uogc2RXJJESG-Rxhe6s10NMNjdhd18g.F7fTbt5s1X-0RVjL_AsAJFsYreumU1GLcKDzOBNXnRMg.PNG/%EC%A0%9C%EB%AA%A9_%EC%97%86%EC%9D%8C-1.png?type=w966"
+                  alt="Crystal Ball"
+                  glowColorClass={dreamText.length > 50 ? "bg-indigo-500" : "bg-purple-500"}
+                  shadowColor={dreamText.length > 50 ? "rgba(99,102,241,0.4)" : "rgba(168,85,247,0.4)"}
+                  onClick={handleSubmit} 
+                  disabled={!dreamText.trim()} 
+                />
+                
+                {/* Interactive Stars based on input */}
+                <AnimatePresence>
+                  {dreamText.length > 0 && Array.from({ length: Math.min(Math.floor(dreamText.length / 10), 12) }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ 
+                        opacity: [0.4, 1, 0.4], 
+                        scale: [1, 1.5, 1],
+                        x: Math.sin(i) * 100,
+                        y: Math.cos(i) * 100
+                      }}
+                      transition={{ 
+                        duration: 2 + Math.random() * 2, 
+                        repeat: Infinity,
+                        delay: i * 0.1
+                      }}
+                      className="absolute top-1/2 left-1/2 w-1 h-1 bg-white rounded-full blur-[1px] z-0"
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
 
-              <div className="w-full glass-panel rounded-3xl p-6 md:p-10 shadow-2xl bg-black/40 border border-white/10 backdrop-blur-xl">
-                <h2 className="text-2xl font-serif text-center mb-8 text-purple-200">
+              <div className="w-full glass-panel rounded-3xl p-6 md:p-8 shadow-2xl bg-black/40 border border-white/10 backdrop-blur-xl relative z-10">
+                <h2 className="text-xl md:text-2xl font-serif text-center mb-6 text-purple-200">
                   어젯밤 어떤 꿈을 꾸셨나요?
                 </h2>
                 
@@ -326,14 +382,17 @@ export default function App() {
                   value={dreamText}
                   onChange={(e) => setDreamText(e.target.value)}
                   placeholder="예: 하늘을 나는 꿈을 꿨어요. 구름 사이를 자유롭게 다니며 행복한 기분을 느꼈습니다."
-                  className="w-full h-40 bg-black/40 border border-purple-500/30 rounded-xl p-4 text-lg text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all resize-none mb-6"
+                  className="w-full h-32 bg-black/40 border border-purple-500/30 rounded-xl p-4 text-lg text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all resize-none mb-4"
                 />
 
-                <div className="mb-8">
-                  <label className="block text-sm font-medium text-purple-300 mb-4 ml-1">
-                    기억나는 키워드 (선택사항)
-                  </label>
-                  <div className="flex flex-wrap gap-2">
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-3 ml-1">
+                    <label className="block text-xs font-medium text-purple-300 uppercase tracking-widest">
+                      기억나는 키워드 (선택사항)
+                    </label>
+                    <span className="text-[10px] text-slate-500">{selectedKeywords.length}개 선택됨</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
                     {COMMON_KEYWORDS.map((keyword) => (
                       <button
                         key={keyword.id}
@@ -344,7 +403,7 @@ export default function App() {
                               : [...prev, keyword.label]
                           );
                         }}
-                        className={`px-4 py-2 rounded-full text-sm transition-all border ${
+                        className={`px-3 py-1.5 rounded-full text-xs transition-all border ${
                           selectedKeywords.includes(keyword.label)
                             ? 'bg-purple-600 border-purple-400 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]'
                             : 'bg-black/40 border-purple-500/20 text-slate-400 hover:border-purple-500/50'
@@ -356,20 +415,20 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <div className="flex flex-col sm:flex-row justify-center gap-3">
                   <button
                     onClick={handleJustSave}
                     disabled={!dreamText.trim()}
-                    className="px-8 py-4 bg-white/5 hover:bg-white/10 disabled:bg-slate-800 disabled:text-slate-500 text-slate-300 rounded-full font-medium tracking-wide transition-all disabled:cursor-not-allowed border border-white/10 cursor-pointer"
+                    className="px-6 py-3 bg-white/5 hover:bg-white/10 disabled:bg-slate-800 disabled:text-slate-500 text-slate-300 rounded-full text-sm font-medium tracking-wide transition-all disabled:cursor-not-allowed border border-white/10 cursor-pointer"
                   >
                     기록만 남기기
                   </button>
                   <button
                     onClick={handleSubmit}
-                    disabled={!dreamText.trim()}
-                    className="px-10 py-4 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-full font-medium tracking-wide transition-all disabled:cursor-not-allowed shadow-[0_0_20px_rgba(147,51,234,0.3)] hover:shadow-[0_0_30px_rgba(147,51,234,0.6)] cursor-pointer"
+                    disabled={dreamText.trim().length < 10}
+                    className="px-8 py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-full text-sm font-medium tracking-wide transition-all disabled:cursor-not-allowed shadow-[0_0_20px_rgba(147,51,234,0.3)] hover:shadow-[0_0_30px_rgba(147,51,234,0.6)] cursor-pointer"
                   >
-                    해몽 시작하기
+                    {dreamText.trim().length < 10 ? `${10 - dreamText.trim().length}자 더 입력` : '해몽 시작하기'}
                   </button>
                 </div>
               </div>

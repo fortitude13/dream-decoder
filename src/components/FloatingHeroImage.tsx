@@ -37,8 +37,8 @@ export default function FloatingHeroImage({ src, alt, glowColorClass, shadowColo
     // Burst of particles
     const burst = Array.from({ length: 40 }).map((_, i) => ({
       id: Date.now() + i,
-      x: containerRef.current ? containerRef.current.offsetWidth / 2 : 225,
-      y: containerRef.current ? containerRef.current.offsetHeight / 2 : 225,
+      x: containerRef.current ? containerRef.current.offsetWidth / 2 : 180,
+      y: containerRef.current ? containerRef.current.offsetHeight / 2 : 180,
       vx: (Math.random() - 0.5) * 350,
       vy: (Math.random() - 0.5) * 350,
     }));
@@ -53,7 +53,7 @@ export default function FloatingHeroImage({ src, alt, glowColorClass, shadowColo
   return (
     <motion.div
       ref={containerRef}
-      className={`relative w-[75vw] h-[75vw] sm:w-[360px] sm:h-[360px] md:w-[450px] md:h-[450px] mb-8 mt-0 shrink-0 overflow-visible ${disabled ? 'opacity-90' : ''} ${onClick && !disabled ? 'cursor-pointer' : 'cursor-default'}`}
+      className={`relative w-[60vw] h-[60vw] sm:w-[280px] sm:h-[280px] md:w-[360px] md:h-[360px] mb-8 mt-0 shrink-0 overflow-visible ${disabled ? 'opacity-90' : ''} ${onClick && !disabled ? 'cursor-pointer' : 'cursor-default'}`}
       animate={{ y: [0, -15, 0] }}
       transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
       onMouseEnter={() => setIsHovered(true)}

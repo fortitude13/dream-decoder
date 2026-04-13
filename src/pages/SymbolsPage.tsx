@@ -27,13 +27,20 @@ const SYMBOL_CATEGORIES = [
 
 export default function SymbolsPage() {
   const [expandedSymbol, setExpandedSymbol] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>('All');
+
+  const filteredCategories = activeCategory === 'All' 
+    ? SYMBOL_CATEGORIES 
+    : SYMBOL_CATEGORIES.filter(cat => cat.name === activeCategory);
+
+  const categories = ['All', ...SYMBOL_CATEGORIES.map(cat => cat.name)];
 
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="absolute inset-0 z-10 overflow-y-auto py-24 px-6 pb-32"
+      className="absolute inset-0 z-10 overflow-y-auto py-24 px-6 pb-32 custom-scrollbar"
     >
       <div className="max-w-5xl mx-auto flex flex-col items-center">
         
@@ -44,12 +51,34 @@ export default function SymbolsPage() {
           shadowColor="rgba(59,130,246,0.4)"
         />
 
-        <h2 className="text-4xl font-serif text-center mb-16 text-gradient">꿈의 상징 사전</h2>
+        <h2 className="text-4xl font-serif text-center mb-8 text-gradient">꿈의 상징 사전</h2>
         
+        {/* Category Filters */}
+        <div className="flex flex-wrap justify-center gap-3 mb-12">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-6 py-2 rounded-full text-xs tracking-widest uppercase transition-all border ${
+                activeCategory === cat
+                  ? 'bg-purple-600 border-purple-400 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]'
+                  : 'bg-white/5 border-white/10 text-slate-400 hover:border-white/20'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
         <div className="space-y-16 w-full">
-          {SYMBOL_CATEGORIES.map(category => (
+          {filteredCategories.map(category => (
             <div key={category.name}>
-              <h3 className="text-2xl font-serif text-purple-200 mb-6 border-b border-purple-500/20 pb-2">{category.name}</h3>
+              <div className="flex justify-between items-end mb-6 border-b border-purple-500/20 pb-2">
+                <h3 className="text-2xl font-serif text-purple-200">{category.name}</h3>
+                <span className="text-[10px] tracking-[0.2em] text-slate-500 uppercase mb-1">
+                  {category.symbols.length} Symbols
+                </span>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {category.symbols.map(symbol => (
                   <div 
