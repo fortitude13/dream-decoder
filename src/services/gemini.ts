@@ -28,15 +28,17 @@ function checkAndTrackUsage(): boolean {
 }
 
 export async function interpretDream(dreamText: string, keywords: string[]): Promise<DreamInterpretation | null> {
-  // API 키 확인
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === "undefined" || apiKey === "MY_GEMINI_API_KEY") {
-    throw new Error("API_KEY_MISSING");
-  }
-
   // 사용량 체크
   if (!checkAndTrackUsage()) {
     throw new Error("QUOTA_EXCEEDED_90");
+  }
+
+  // API 키 가져오기 (다양한 환경 대응)
+  const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY || "";
+  
+  if (!apiKey || apiKey === "undefined" || apiKey === "") {
+    console.error("Gemini API Key is missing. Please check your environment variables.");
+    return null;
   }
 
   const ai = new GoogleGenAI({ apiKey });
@@ -104,8 +106,8 @@ export async function interpretDream(dreamText: string, keywords: string[]): Pro
 }
 
 export async function generateDreamImage(dreamText: string, summary: string): Promise<string | null> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === "undefined" || apiKey === "MY_GEMINI_API_KEY") {
+  const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY || "";
+  if (!apiKey || apiKey === "undefined" || apiKey === "") {
     return null;
   }
 

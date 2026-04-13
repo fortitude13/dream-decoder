@@ -88,24 +88,16 @@ export default function App() {
         setPage('result');
       } else {
         setResultData({
-          reflection: "별들이 구름에 가려졌습니다. 꿈을 해석할 수 없습니다.",
+          reflection: "별들이 구름에 가려졌습니다. API 키 설정을 확인하거나 잠시 후 다시 시도해주세요.",
           summary: "해석 실패",
           oneLiner: "해석할 수 없는 꿈입니다.",
           symbols: [],
-          emotionalInsight: "잠시 후 다시 시도해 주세요."
+          emotionalInsight: "Vercel 환경 변수(GEMINI_API_KEY)가 올바르게 설정되어 있는지 확인이 필요합니다."
         });
       }
     } catch (error: any) {
       console.error(error);
-      if (error.message === "API_KEY_MISSING") {
-        setResultData({
-          reflection: "API 키가 설정되지 않았습니다.",
-          summary: "설정 오류",
-          oneLiner: "Vercel 환경 변수를 확인해주세요.",
-          symbols: [],
-          emotionalInsight: "Vercel Settings > Environment Variables에서 GEMINI_API_KEY를 추가해야 합니다."
-        });
-      } else if (error.message === "QUOTA_EXCEEDED_90" || error.message === "API_QUOTA_EXHAUSTED") {
+      if (error.message === "QUOTA_EXCEEDED_90" || error.message === "API_QUOTA_EXHAUSTED") {
         setResultData({
           reflection: "오늘의 해몽 기운이 소진되었습니다.",
           summary: "쿼터 초과",
@@ -292,7 +284,7 @@ export default function App() {
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && dreamText.length >= 10) {
-                        setPage('input');
+                        handleSubmit();
                       }
                     }}
                     placeholder="최소 10자 이상 꿈을 기록해보세요..."
@@ -300,7 +292,7 @@ export default function App() {
                   />
                   {dreamText.length > 0 && (
                     <button 
-                      onClick={() => setPage('input')}
+                      onClick={handleSubmit}
                       className="mr-2 p-2 bg-purple-600 rounded-full hover:bg-purple-500 transition-colors shadow-lg"
                     >
                       <ChevronDown className="w-5 h-5 text-white -rotate-90" />
