@@ -118,17 +118,32 @@ export async function generateDreamImage(dreamText: string, summary: string): Pr
   Style: Soft, ethereal, abstract, oil painting style with deep blues, purples, and gold accents. 
   Atmosphere: Mysterious, emotional, and introspective.`;
 
-  try {
-    // 1. 이미 해몽 결과(data)에 포함된 이미지 주소를 가져옵니다.
-    // 만약 코드 상단에 result라고 되어있으면 data 대신 result라고 적으세요.
-    const imageUrl = data.image_prompt; 
+    try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: {
+        parts: [
+          {
+            text: prompt,
+          },
+        ],
+      },
+      config: {
+        imageConfig: {
+          aspectRatio: "1:1",
+        },
+      },
+    });
 
-    // 2. 가져온 주소를 반환합니다. 
-    // 이렇게 하면 버튼을 눌렀을 때 구글을 거치지 않고 바로 이미지가 뜹니다.
-    return imageUrl;
-
+    for (const part of response.candidates?.[0]?.content?.parts || []) {
+      if (part.inlineData) {
+        return `data:image/png;base64,${part.inlineData.data}`;
+      }
+    }
+    return null;
   } catch (error) {
-    console.error("이미지를 불러오는 데 실패했습니다.", error);
+    console.error("Error generating dream image:", error);
     return null;
   }
+
 }
